@@ -57,6 +57,7 @@ class Faker
         $fakers = $this->getFakers();
         if (property_exists($schema, '$ref')) {
             $currentDir = $schemaDir ?? $this->schemaDir;
+
             return (new Ref($this, $currentDir))($schema, $parentSchema);
         }
         $type = is_array($schema->type) ? Base::randomElement($schema->type) : $schema->type;
@@ -188,10 +189,12 @@ class Faker
         $dummies = [];
         $itemSize = Base::numberBetween(get($schema, 'minItems', 0), get($schema, 'maxItems', count($subschemas)));
         $subschemas = array_slice($subschemas, 0, $itemSize);
+        $dir = $this->schemaDir;
         for ($i = 0; $i < $itemSize; $i++) {
-            $dummies[] = $this->generate($subschemas[$i % count($subschemas)]);
+            $subschema = $subschemas[$i % count($subschemas)];
+            $dummies[] = $this->generate($subschema, $schema, $dir);
         }
-
+        $this->schemaDir = $dir;
         return get($schema, 'uniqueItems', false) ? array_unique($dummies) : $dummies;
     }
 
