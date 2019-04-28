@@ -1,11 +1,15 @@
 {
   "type": "object",
   "required": [
-    "typeOnly"
+    "bool",
+    "null"
   ],
   "properties": {
-    "typeOnly": {
-      "$ref": "./def/ref.json"
+    "bool": {
+      "$ref": "./def/boolean.json"
+    },
+    "null": {
+      "$ref": "./def/null.json"
     }
   }
 }

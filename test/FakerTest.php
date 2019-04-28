@@ -68,6 +68,7 @@ class FakerTest extends TestCase
             ['object'],
             ['combining'],
             ['ref_file'],
+            ['ref_file_ref'],
             ['ref_file_double']
         ];
     }
