@@ -39,10 +39,11 @@ class Faker
      *
      * @param  \SplFileInfo|\stdClass $schema Data structure writen in JSON Schema
      * @param \stdClass $parentSchema parent schema when it is subschema
+     * @param string $schemaDir forced directory in object loop
      * @return mixed dummy data
      * @throws \Exception Throw when unsupported type specified
      */
-    public function generate($schema, \stdClass $parentSchema = null)
+    public function generate($schema, \stdClass $parentSchema = null, string $schemaDir = null)
     {
         if ($schema instanceof \SplFileInfo) {
             $file = $schema->getRealPath();
@@ -55,7 +56,8 @@ class Faker
         $schema = resolveOf($schema);
         $fakers = $this->getFakers();
         if (property_exists($schema, '$ref')) {
-            return (new Ref($this, $this->schemaDir))($schema, $parentSchema);
+            $currentDir = $schemaDir ?? $this->schemaDir;
+            return (new Ref($this, $currentDir))($schema, $parentSchema);
         }
         $type = is_array($schema->type) ? Base::randomElement($schema->type) : $schema->type;
 
@@ -204,6 +206,7 @@ class Faker
         $propertyNames = getProperties($schema);
 
         $dummy = new \stdClass();
+        $schemaDir = $this->schemaDir;
         foreach ($propertyNames as $key) {
             if (isset($properties->{$key})) {
                 $subschema = $properties->{$key};
@@ -211,7 +214,7 @@ class Faker
                 $subschema = getAdditionalPropertySchema($schema, $key) ?: $this->getRandomSchema();
             }
 
-            $dummy->{$key} = $this->generate($subschema, $schema);
+            $dummy->{$key} = $this->generate($subschema, $schema, $schemaDir);
         }
 
         return $dummy;
