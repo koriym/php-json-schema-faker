@@ -11,10 +11,6 @@
     "typeOnly": {
       "type": "array"
     },
-    "typeAndMinItems": {
-      "type": "array",
-      "minItems": 10
-    },
     "typeAndMaxItems": {
       "type": "array",
       "maxItems": 10
