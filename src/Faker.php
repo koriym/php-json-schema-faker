@@ -202,6 +202,7 @@ class Faker
      */
     private function fakeObject(\stdClass $schema)
     {
+        $dir = $this->schemaDir;
         $properties = get($schema, 'properties', new \stdClass());
         $propertyNames = getProperties($schema);
 
@@ -216,7 +217,7 @@ class Faker
 
             $dummy->{$key} = $this->generate($subschema, $schema, $schemaDir);
         }
-
+        $this->schemaDir = $dir;
         return $dummy;
     }
 

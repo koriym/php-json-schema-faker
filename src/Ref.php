@@ -7,6 +7,11 @@
 
 namespace JSONSchemaFaker;
 
+use function dirname;
+use function file_exists;
+use function realpath;
+use function substr;
+
 class Ref
 {
     /**
@@ -41,17 +46,22 @@ class Ref
         foreach ($paths as $schemaPath) {
             $prop = $prop->{$schemaPath};
         }
-        return $this->faker->generate($prop);
+        return $this->faker->generate($prop, null);
     }
 
     private function externalRef(string $path, \stdClass $parentSchema = null)
     {
-        $jsonPath = sprintf('%s/%s', $this->schemaDir, str_replace('./', '', $path));
+        $jsonFileName = substr($path, 0, 2) === './' ? substr($path, 2) : $path;
+        $jsonPath = sprintf('%s/%s', $this->schemaDir, $jsonFileName);
+        $realPath = realpath($jsonPath);
         if (! file_exists($jsonPath)) {
-            return $this->inlineRefInExternalRef($jsonPath);
+            throw new \RuntimeException("JSON file not exits:{$jsonPath}");
+        }
+        if (! file_exists($realPath)) {
+            return $this->inlineRefInExternalRef($realPath);
         }
 
-        return $this->faker->generate(new \SplFileInfo($jsonPath), $parentSchema);
+        return $this->faker->generate(new \SplFileInfo($realPath), $parentSchema, dirname($jsonPath));
     }
 
     private function inlineRefInExternalRef(string $jsonPath)
