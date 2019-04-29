@@ -38,7 +38,7 @@ class Faker
     private $schemaDir;
 
     /**
-     * Create dummy data with JSON schema
+     * Create fake data with JSON schema
      *
      * @param \SplFileInfo|\stdClass $schema       Data structure written in JSON Schema
      * @param \stdClass              $parentSchema parent schema when it is subschema
@@ -46,7 +46,7 @@ class Faker
      *
      * @throws \Exception Throw when unsupported type specified
      *
-     * @return mixed dummy data
+     * @return mixed
      */
     public function generate($schema, \stdClass $parentSchema = null, string $schemaDir = null)
     {
@@ -200,36 +200,17 @@ class Faker
         return $propertyNames;
     }
 
-    /**
-     * Create null
-     *
-     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
-     */
     private function fakeNull()
     {
         return null;
     }
 
-    /**
-     * Create dummy boolean with JSON schema
-     *
-     * @return bool true or false
-     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
-     */
     private function fakeBoolean()
     {
         return Base::randomElement([true, false]);
     }
 
-    /**
-     * Create dummy integer with JSON schema
-     *
-     * @param \stdClass $schema Data structure
-     *
-     * @return int
-     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
-     */
-    private function fakeInteger(\stdClass $schema)
+    private function fakeInteger(\stdClass $schema) : int
     {
         $minimum = $this->getMinimum($schema);
         $maximum = $this->getMaximum($schema);
@@ -238,14 +219,6 @@ class Faker
         return (int) Base::numberBetween($minimum, $maximum) * $multipleOf;
     }
 
-    /**
-     * Create dummy floating number with JSON schema
-     *
-     * @param \stdClass $schema Data structure
-     *
-     * @return float
-     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
-     */
     private function fakeNumber(\stdClass $schema)
     {
         $minimum = $this->getMinimum($schema);
@@ -255,13 +228,7 @@ class Faker
         return Base::randomFloat(null, $minimum, $maximum) * $multipleOf;
     }
 
-    /**
-     * @param \stdClass $schema Data structure
-     *
-     * @return string
-     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
-     */
-    private function fakeString(\stdClass $schema)
+    private function fakeString(\stdClass $schema) : string
     {
         if (isset($schema->format)) {
             return $this->getFormattedValue($schema);
@@ -283,13 +250,7 @@ class Faker
         return mb_substr($lorem, 0, $max);
     }
 
-    /**
-     * @param \stdClass $schema Data structure
-     *
-     * @return array
-     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
-     */
-    private function fakeArray(\stdClass $schema)
+    private function fakeArray(\stdClass $schema) : array
     {
         if (! isset($schema->items)) {
             $subschemas = [$this->getRandomSchema()];
@@ -316,13 +277,7 @@ class Faker
         return ($schema->uniqueItems ?? false) ? array_unique($dummies) : $dummies;
     }
 
-    /**
-     * @param \stdClass $schema Data structure
-     *
-     * @return \stdClass
-     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
-     */
-    private function fakeObject(\stdClass $schema)
+    private function fakeObject(\stdClass $schema) : \stdClass
     {
         $dir = $this->schemaDir;
         $properties = $schema->properties ?? new \stdClass();
@@ -344,6 +299,9 @@ class Faker
         return $dummy;
     }
 
+    /**
+     * @return mixed
+     */
     private function getAdditionalPropertySchema(\stdClass $schema, $property)
     {
         $patternProperties = $schema->patternProperties ?? new \stdClass();
