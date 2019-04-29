@@ -53,7 +53,7 @@ class Faker
         if (! $schema instanceof \stdClass) {
             throw new \InvalidArgumentException(gettype($schema));
         }
-        $schema = resolveOf($schema);
+        $schema = $this->resolveOf($schema);
         $fakers = $this->getFakers();
         if (property_exists($schema, '$ref')) {
             $currentDir = $schemaDir ?? $this->schemaDir;
@@ -231,5 +231,19 @@ class Faker
         return (object)[
             'type' => Base::randomElement($fakerNames)
         ];
+    }
+
+    private function resolveOf(\stdClass $schema)
+    {
+        if (isset($schema->allOf)) {
+            return call_user_func_array(__NAMESPACE__.'\mergeObject', $schema->allOf);
+        }
+        if (isset($schema->anyOf)) {
+            return call_user_func_array(__NAMESPACE__.'\mergeObject', Base::randomElements($schema->anyOf));
+        }
+        if (isset($schema->oneOf)) {
+            return Base::randomElement($schema->oneOf);
+        }
+        return $schema;
     }
 }
