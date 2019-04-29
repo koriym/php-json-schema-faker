@@ -219,7 +219,7 @@ class Faker
         $maximum = $this->getMaximum($schema);
         $multipleOf = $this->getMultipleOf($schema);
 
-        return (int) Base::numberBetween($minimum, $maximum) * $multipleOf;
+        return Base::numberBetween($minimum, $maximum) * $multipleOf;
     }
 
     private function fakeNumber(\stdClass $schema)
