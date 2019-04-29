@@ -127,7 +127,7 @@ class Faker
         ];
     }
 
-    public function resolveOf(\stdClass $schema)
+    public function resolveOf(\stdClass $schema) : \stdClass
     {
         if (isset($schema->allOf)) {
             return call_user_func_array([$this, 'mergeObject'], $schema->allOf);
