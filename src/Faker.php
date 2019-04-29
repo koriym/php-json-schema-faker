@@ -56,7 +56,7 @@ class Faker
             if (file_exists($file)) {
                 $this->schemaDir = dirname($file);
             }
-            $schema = json_decode(file_get_contents($file));
+            $schema = json_decode((string) file_get_contents($file));
         }
         if (! $schema instanceof \stdClass) {
             throw new \InvalidArgumentException(gettype($schema));
