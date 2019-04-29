@@ -27,7 +27,7 @@ class Faker
      *
      * @see    http://json-schema.org
      *
-     * @param \SplFileInfo|\stdClass $schema Data structure writen in JSON Schema
+     * @param \SplFileInfo|\stdClass $schema Data structure written in JSON Schema
      *
      * @return mixed dummy data
      */
