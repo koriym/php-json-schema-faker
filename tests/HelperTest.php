@@ -122,10 +122,6 @@ class HelperTest extends TestCase
         (new Faker)->getFormattedValue((object) ['format' => 'xxxxx']);
     }
 
-    public function testGetPropertiesMust()
-    {
-    }
-
     /**
      * @see testGetFormattedValueMustReturnValidValue
      * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
