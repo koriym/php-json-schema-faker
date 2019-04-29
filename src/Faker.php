@@ -13,6 +13,7 @@ use Faker\Provider\Internet;
 use Faker\Provider\Lorem;
 use function file_exists;
 use function file_get_contents;
+use function is_callable;
 use function json_decode;
 use function substr;
 
@@ -46,8 +47,6 @@ class Faker
      * @param string                 $schemaDir    forced directory in object loop
      *
      * @throws UnsupportedTypeException Throw when unsupported type specified
-     *
-     * @return mixed
      */
     public function generate($schema, \stdClass $parentSchema = null, string $schemaDir = null)
     {
@@ -77,7 +76,12 @@ class Faker
             throw new UnsupportedTypeException($type);
         }
 
-        return call_user_func([$this, $this->fakers[$type]], $schema);
+        $faker = [$this, $this->fakers[$type]];
+        if (is_callable($faker)) {
+            return call_user_func($faker, $schema);
+        }
+
+        throw new \LogicException;
     }
 
     public function mergeObject()
@@ -302,9 +306,6 @@ class Faker
         return $dummy;
     }
 
-    /**
-     * @return mixed
-     */
     private function getAdditionalPropertySchema(\stdClass $schema, $property)
     {
         $patternProperties = $schema->patternProperties ?? new \stdClass();
