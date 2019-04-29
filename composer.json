@@ -1,6 +1,6 @@
 {
     "name": "koriym/json-schema-faker",
-    "description": "Generates fake JSON by JSON schema",
+    "description": "Generates fake JSON with JSON schema",
     "type": "library",
     "license": "MIT",
     "authors": [

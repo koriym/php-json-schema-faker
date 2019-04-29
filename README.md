@@ -2,7 +2,7 @@
 # PHP JSON Schema Faker
 [![Build Status](https://travis-ci.org/koriym/php-json-schema-faker.svg?branch=master)](https://travis-ci.org/koriym/php-json-schema-faker)
 
-Generates fake JSON by JSON schema.
+Generates fake JSON with JSON schema.
 
 forked from [leko/json-schema-faker](https://github.com/Leko/php-json-schema-faker) (deprecated)
 
