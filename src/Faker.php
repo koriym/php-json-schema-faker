@@ -44,7 +44,7 @@ class Faker
      * @param \stdClass              $parentSchema parent schema when it is subschema
      * @param string                 $schemaDir    forced directory in object loop
      *
-     * @throws \Exception Throw when unsupported type specified
+     * @throws UnsupportedTypeException Throw when unsupported type specified
      *
      * @return mixed
      */
@@ -71,7 +71,7 @@ class Faker
         }
 
         if (! isset($this->fakers[$type])) {
-            throw new \Exception("Unsupported type: {$type}");
+            throw new UnsupportedTypeException($type);
         }
 
         return call_user_func([$this, $this->fakers[$type]], $schema);
@@ -171,7 +171,7 @@ class Faker
             case 'uri':
                 return $this->getInternetFakerInstance()->url();
             default:
-                throw new \Exception("Unsupported type: {$schema->format}");
+                throw new UnsupportedTypeException("Unsupported type: {$schema->format}");
         }
     }
 

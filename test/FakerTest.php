@@ -6,6 +6,7 @@ namespace JSONSchemaFaker\Test;
 
 use JsonSchema\Validator;
 use JSONSchemaFaker\Faker;
+use JSONSchemaFaker\UnsupportedTypeException;
 
 class FakerTest extends TestCase
 {
@@ -78,7 +79,7 @@ class FakerTest extends TestCase
 
     public function testFakeMustThrowExceptionIfInvalidType()
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(UnsupportedTypeException::class);
 
         (new Faker)->generate((object) ['type' => 'xxxxx']);
     }
