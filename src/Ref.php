@@ -75,7 +75,7 @@ class Ref
         if (! file_exists($schemaFile)) {
             throw new \RuntimeException("JSON file not exits:{$jsonPath}");
         }
-        $json = json_decode(file_get_contents($schemaFile));
+        $json = json_decode((string) file_get_contents($schemaFile));
 
         return $this->inlineRef($json, $path);
     }
