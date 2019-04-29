@@ -1,0 +1,3 @@
+parameters:
+	ignoreErrors:
+		- '#Parameter \#1 $schema of method JSONSchemaFaker\Faker::generate\(\) expects SplFileInfo|stdClass, null given.#'

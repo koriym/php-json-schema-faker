@@ -21,7 +21,7 @@ class FakerTest extends TestCase
         $actual = (new Faker)->generate($schema);
         $validator->check($actual, $schema);
 
-        $this->assertTrue($validator->isValid(), json_encode($validator->getErrors(), JSON_PRETTY_PRINT));
+        $this->assertTrue($validator->isValid(), (string) json_encode($validator->getErrors(), JSON_PRETTY_PRINT));
     }
 
     /**
@@ -35,7 +35,7 @@ class FakerTest extends TestCase
         $actual = (new Faker)->generate(new \SplFileInfo($schema));
         $validator->check($actual, $schema);
 
-        $this->assertTrue($validator->isValid(), json_encode($validator->getErrors(), JSON_PRETTY_PRINT));
+        $this->assertTrue($validator->isValid(), (string) json_encode($validator->getErrors(), JSON_PRETTY_PRINT));
     }
 
     public function testGenerateInvalidParameter()

@@ -8,7 +8,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
 {
     protected function getFixture($name)
     {
-        return json_decode(file_get_contents(__DIR__ . "/fixture/{$name}.json"));
+        return json_decode((string) file_get_contents(__DIR__ . "/fixture/{$name}.json"));
     }
 
     protected function getFile($name)
