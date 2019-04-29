@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 namespace JSONSchemaFaker;
 
 use function call_user_func_array;
@@ -24,20 +23,19 @@ class Faker
      * @var array
      */
     private $fakers = [
-            'null' => 'fakeNull',
-            'boolean' => 'fakeBoolean',
-            'integer' => 'fakeInteger',
-            'number' => 'fakeNumber',
-            'string' => 'fakeString',
-            'array' => 'fakeArray',
-            'object' => 'fakeObject'
+        'null' => 'fakeNull',
+        'boolean' => 'fakeBoolean',
+        'integer' => 'fakeInteger',
+        'number' => 'fakeNumber',
+        'string' => 'fakeString',
+        'array' => 'fakeArray',
+        'object' => 'fakeObject'
     ];
 
     /**
      * @var string
      */
     private $schemaDir;
-
 
     /**
      * Create dummy data with JSON schema
@@ -115,6 +113,91 @@ class Faker
         }
 
         return $resolved;
+    }
+
+    public function getRandomSchema()
+    {
+        $fakerNames = array_keys($this->fakers);
+
+        return (object) [
+            'type' => Base::randomElement($fakerNames)
+        ];
+    }
+
+    public function resolveOf(\stdClass $schema)
+    {
+        if (isset($schema->allOf)) {
+            return call_user_func_array([$this, 'mergeObject'], $schema->allOf);
+        }
+        if (isset($schema->anyOf)) {
+            return call_user_func_array([$this, 'mergeObject'], Base::randomElements($schema->anyOf));
+        }
+        if (isset($schema->oneOf)) {
+            return Base::randomElement($schema->oneOf);
+        }
+
+        return $schema;
+    }
+
+    public function getMultipleOf($schema) : int
+    {
+        return $schema->multipleOf ?? 1;
+    }
+
+    public function getInternetFakerInstance() : Internet
+    {
+        return new Internet(Factory::create());
+    }
+
+    public function getFormattedValue($schema)
+    {
+        switch ($schema->format) {
+            // Date representation, as defined by RFC 3339, section 5.6.
+            case 'date-time':
+                return DateTime::dateTime()->format(DATE_RFC3339);
+            // Internet email address, see RFC 5322, section 3.4.1.
+            case 'email':
+                return $this->getInternetFakerInstance()->safeEmail();
+            // Internet host name, see RFC 1034, section 3.1.
+            case 'hostname':
+                return $this->getInternetFakerInstance()->domainName();
+            // IPv4 address, according to dotted-quad ABNF syntax as defined in RFC 2673, section 3.2.
+            case 'ipv4':
+                return $this->getInternetFakerInstance()->ipv4();
+            // IPv6 address, as defined in RFC 2373, section 2.2.
+            case 'ipv6':
+                return $this->getInternetFakerInstance()->ipv6();
+            // A universal resource identifier (URI), according to RFC3986.
+            case 'uri':
+                return $this->getInternetFakerInstance()->url();
+            default:
+                throw new \Exception("Unsupported type: {$schema->format}");
+        }
+    }
+
+    /**
+     * @return string[] Property names
+     */
+    public function getProperties(\stdClass $schema) : array
+    {
+        $requiredKeys = $schema->required ?? [];
+        $optionalKeys = array_keys((array) ($schema->properties ?? new \stdClass()));
+        $maxProperties = $schema->maxProperties ?? count($optionalKeys) - count($requiredKeys);
+        $pickSize = Base::numberBetween(0, min(count($optionalKeys), $maxProperties));
+        $additionalKeys = $this->resolveDependencies($schema, Base::randomElements($optionalKeys, $pickSize));
+        $propertyNames = array_unique(array_merge($requiredKeys, $additionalKeys));
+
+        $additionalProperties = $schema->additionalProperties ?? true;
+        $patternProperties = $schema->patternProperties ?? new \stdClass();
+        $patterns = array_keys((array) $patternProperties);
+        while (count($propertyNames) < ($schema->minProperties ?? 0)) {
+            $name = $additionalProperties ? Lorem::word() : Lorem::regexify(Base::randomElement($patterns));
+            if (! in_array($name, $propertyNames, true)) {
+                $propertyNames[] = $name;
+            }
+        }
+
+        return $propertyNames;
     }
 
     /**
@@ -259,91 +342,6 @@ class Faker
         $this->schemaDir = $dir;
 
         return $dummy;
-    }
-
-    public function getRandomSchema()
-    {
-        $fakerNames = array_keys($this->fakers);
-
-        return (object) [
-            'type' => Base::randomElement($fakerNames)
-        ];
-    }
-
-    public function resolveOf(\stdClass $schema)
-    {
-        if (isset($schema->allOf)) {
-            return call_user_func_array([$this,'mergeObject'], $schema->allOf);
-        }
-        if (isset($schema->anyOf)) {
-            return call_user_func_array([$this,'mergeObject'], Base::randomElements($schema->anyOf));
-        }
-        if (isset($schema->oneOf)) {
-            return Base::randomElement($schema->oneOf);
-        }
-
-        return $schema;
-    }
-
-    public function getMultipleOf($schema) : int
-    {
-        return $schema->multipleOf ?? 1;
-    }
-
-    public function getInternetFakerInstance() : Internet
-    {
-        return new Internet(Factory::create());
-    }
-
-    public function getFormattedValue($schema)
-    {
-        switch ($schema->format) {
-            // Date representation, as defined by RFC 3339, section 5.6.
-            case 'date-time':
-                return DateTime::dateTime()->format(DATE_RFC3339);
-            // Internet email address, see RFC 5322, section 3.4.1.
-            case 'email':
-                return $this->getInternetFakerInstance()->safeEmail();
-            // Internet host name, see RFC 1034, section 3.1.
-            case 'hostname':
-                return $this->getInternetFakerInstance()->domainName();
-            // IPv4 address, according to dotted-quad ABNF syntax as defined in RFC 2673, section 3.2.
-            case 'ipv4':
-                return $this->getInternetFakerInstance()->ipv4();
-            // IPv6 address, as defined in RFC 2373, section 2.2.
-            case 'ipv6':
-                return $this->getInternetFakerInstance()->ipv6();
-            // A universal resource identifier (URI), according to RFC3986.
-            case 'uri':
-                return $this->getInternetFakerInstance()->url();
-            default:
-                throw new \Exception("Unsupported type: {$schema->format}");
-        }
-    }
-
-    /**
-     * @return string[] Property names
-     */
-    public function getProperties(\stdClass $schema) : array
-    {
-        $requiredKeys = $schema->required ?? [];
-        $optionalKeys = array_keys((array) ($schema->properties ?? new \stdClass()));
-        $maxProperties = $schema->maxProperties ?? count($optionalKeys) - count($requiredKeys);
-        $pickSize = Base::numberBetween(0, min(count($optionalKeys), $maxProperties));
-        $additionalKeys = $this->resolveDependencies($schema, Base::randomElements($optionalKeys, $pickSize));
-        $propertyNames = array_unique(array_merge($requiredKeys, $additionalKeys));
-
-        $additionalProperties = $schema->additionalProperties ?? true;
-        $patternProperties = $schema->patternProperties ?? new \stdClass();
-        $patterns = array_keys((array) $patternProperties);
-        while (count($propertyNames) < ($schema->minProperties ?? 0)) {
-            $name = $additionalProperties ? Lorem::word() : Lorem::regexify(Base::randomElement($patterns));
-            if (! in_array($name, $propertyNames, true)) {
-                $propertyNames[] = $name;
-            }
-        }
-
-        return $propertyNames;
     }
 
     private function getAdditionalPropertySchema(\stdClass $schema, $property)
