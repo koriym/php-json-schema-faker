@@ -261,7 +261,7 @@ class Faker
         } elseif (is_array($schema->items)) {
             $subschemas = $schema->items;
         } else {
-            throw new \Exception('Invalid items');
+            throw new InvalidItemsException;
         }
 
         $dummies = [];
