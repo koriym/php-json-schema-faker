@@ -152,8 +152,8 @@ class Faker
         } elseif (isset($schema->pattern)) {
             return Lorem::regexify($schema->pattern);
         } else {
-            $min = get($schema, 'minLength', 1);
-            $max = get($schema, 'maxLength', max(5, $min + 1));
+            $min = $schema->minLength ?? 1;
+            $max = $schema->maxLength ?? max(5, $min + 1);
             if ($max < 5) {
                 return substr(Lorem::text(5), 0, $max);
             }
@@ -187,7 +187,7 @@ class Faker
         }
 
         $dummies = [];
-        $itemSize = Base::numberBetween(get($schema, 'minItems', 0), get($schema, 'maxItems', count($subschemas)));
+        $itemSize = Base::numberBetween(($schema->minItems ?? 0), $schema->maxItems ?? count($subschemas));
         $subschemas = array_slice($subschemas, 0, $itemSize);
         $dir = $this->schemaDir;
         for ($i = 0; $i < $itemSize; $i++) {
@@ -195,7 +195,7 @@ class Faker
             $dummies[] = $this->generate($subschema, $schema, $dir);
         }
         $this->schemaDir = $dir;
-        return get($schema, 'uniqueItems', false) ? array_unique($dummies) : $dummies;
+        return ($schema->uniqueItems ?? false) ? array_unique($dummies) : $dummies;
     }
 
     /**
@@ -206,7 +206,7 @@ class Faker
     private function fakeObject(\stdClass $schema)
     {
         $dir = $this->schemaDir;
-        $properties = get($schema, 'properties', new \stdClass());
+        $properties = $schema->properties ?? new \stdClass();
         $propertyNames = getProperties($schema);
 
         $dummy = new \stdClass();
