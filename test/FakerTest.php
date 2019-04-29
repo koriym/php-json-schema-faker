@@ -17,7 +17,7 @@ class FakerTest extends TestCase
         $schema = $this->getFixture($type);
         $validator = new Validator();
 
-        $actual = Faker::fake($schema);
+        $actual = (new Faker)->generate($schema);
         $validator->check($actual, $schema);
 
         $this->assertTrue($validator->isValid(), json_encode($validator->getErrors(), JSON_PRETTY_PRINT));
@@ -80,6 +80,6 @@ class FakerTest extends TestCase
     {
         $this->expectException(\Exception::class);
 
-        Faker::fake((object) ['type' => 'xxxxx']);
+        (new Faker)->generate((object) ['type' => 'xxxxx']);
     }
 }

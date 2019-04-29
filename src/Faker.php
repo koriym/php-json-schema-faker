@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace JSONSchemaFaker;
 
+use function call_user_func_array;
 use function dirname;
 use Faker\Factory;
 use Faker\Provider\Base;
@@ -18,6 +19,21 @@ use function substr;
 class Faker
 {
     /**
+     * type-fake method map
+     *
+     * @var array
+     */
+    private $fakers = [
+            'null' => 'fakeNull',
+            'boolean' => 'fakeBoolean',
+            'integer' => 'fakeInteger',
+            'number' => 'fakeNumber',
+            'string' => 'fakeString',
+            'array' => 'fakeArray',
+            'object' => 'fakeObject'
+    ];
+
+    /**
      * @var string
      */
     private $schemaDir;
@@ -26,7 +42,7 @@ class Faker
     /**
      * Create dummy data with JSON schema
      *
-     * @param \SplFileInfo|\stdClass $schema       Data structure writen in JSON Schema
+     * @param \SplFileInfo|\stdClass $schema       Data structure written in JSON Schema
      * @param \stdClass              $parentSchema parent schema when it is subschema
      * @param string                 $schemaDir    forced directory in object loop
      *
@@ -45,7 +61,6 @@ class Faker
             throw new \InvalidArgumentException(gettype($schema));
         }
         $schema = $this->resolveOf($schema);
-        $fakers = $this->getFakers();
         if (property_exists($schema, '$ref')) {
             $currentDir = $schemaDir ?? $this->schemaDir;
 
@@ -57,11 +72,11 @@ class Faker
             return Base::randomElement($schema->enum);
         }
 
-        if (! isset($fakers[$type])) {
+        if (! isset($this->fakers[$type])) {
             throw new \Exception("Unsupported type: {$type}");
         }
 
-        return $fakers[$type]($schema);
+        return call_user_func([$this, $this->fakers[$type]], $schema);
     }
 
     public function mergeObject()
@@ -100,19 +115,6 @@ class Faker
         }
 
         return $resolved;
-    }
-
-    private function getFakers()
-    {
-        return [
-            'null' => [$this, 'fakeNull'],
-            'boolean' => [$this, 'fakeBoolean'],
-            'integer' => [$this, 'fakeInteger'],
-            'number' => [$this, 'fakeNumber'],
-            'string' => [$this, 'fakeString'],
-            'array' => [$this, 'fakeArray'],
-            'object' => [$this, 'fakeObject']
-        ];
     }
 
     /**
@@ -261,7 +263,7 @@ class Faker
 
     public function getRandomSchema()
     {
-        $fakerNames = array_keys($this->getFakers());
+        $fakerNames = array_keys($this->fakers);
 
         return (object) [
             'type' => Base::randomElement($fakerNames)
