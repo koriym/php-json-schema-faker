@@ -1,9 +1,7 @@
 <?php
-/**
- * JSON Schema faker
- *
- * @see https://github.com/Leko/php-json-schema-faker
- */
+
+declare(strict_types=1);
+
 
 namespace JSONSchemaFaker;
 
@@ -36,6 +34,7 @@ class Ref
         if ($path[0] === '#' && $parentSchema instanceof \stdClass) {
             return $this->inlineRef($parentSchema, $path);
         }
+
         return $this->externalRef($path, $parentSchema);
     }
 
@@ -46,6 +45,7 @@ class Ref
         foreach ($paths as $schemaPath) {
             $prop = $prop->{$schemaPath};
         }
+
         return $this->faker->generate($prop, null);
     }
 

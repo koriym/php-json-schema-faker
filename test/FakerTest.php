@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JSONSchemaFaker\Test;
 
-use JSONSchemaFaker\Faker;
 use JsonSchema\Validator;
+use JSONSchemaFaker\Faker;
 
 class FakerTest extends TestCase
 {
@@ -74,11 +76,10 @@ class FakerTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException Exception
-     */
     public function testFakeMustThrowExceptionIfInvalidType()
     {
-        Faker::fake((object)['type' => 'xxxxx']);
+        $this->expectException(\Exception::class);
+
+        Faker::fake((object) ['type' => 'xxxxx']);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JSONSchemaFaker\Test;
 
 use JsonSchema\Validator;
@@ -12,7 +14,7 @@ class HelperTest extends TestCase
     public function testGetMustReturnPropertyValueIfExists()
     {
         $expected = 123;
-        $obj = (object)['xxx' => $expected];
+        $obj = (object) ['xxx' => $expected];
         $key = 'xxx';
 
         $actual = \JSONSchemaFaker\get($obj, $key);
@@ -23,7 +25,7 @@ class HelperTest extends TestCase
     public function testGetMustReturnDefaultValueIfNotExists()
     {
         $expected = 123;
-        $obj = (object)['xxx' => $expected];
+        $obj = (object) ['xxx' => $expected];
         $key = 'aaa';
 
         $actual = \JSONSchemaFaker\get($obj, $key, $expected);
@@ -34,7 +36,7 @@ class HelperTest extends TestCase
     public function testGetMaximumMustReturnMaximumMinusOneIfExclusiveMaximumTrue()
     {
         $maximum = 300;
-        $schema = (object)['exclusiveMaximum' => true, 'maximum' => $maximum];
+        $schema = (object) ['exclusiveMaximum' => true, 'maximum' => $maximum];
 
         $actual = \JSONSchemaFaker\getMaximum($schema);
 
@@ -45,7 +47,7 @@ class HelperTest extends TestCase
     public function testGetMaximumMustReturnMaximumIfExclusiveMaximumFalse()
     {
         $maximum = 300;
-        $schema = (object)['exclusiveMaximum' => false, 'maximum' => $maximum];
+        $schema = (object) ['exclusiveMaximum' => false, 'maximum' => $maximum];
 
         $actual = \JSONSchemaFaker\getMaximum($schema);
 
@@ -55,7 +57,7 @@ class HelperTest extends TestCase
     public function testGetMaximumMustReturnMaximumIfExclusiveMaximumAbsent()
     {
         $maximum = 300;
-        $schema = (object)['maximum' => $maximum];
+        $schema = (object) ['maximum' => $maximum];
 
         $actual = \JSONSchemaFaker\getMaximum($schema);
 
@@ -65,7 +67,7 @@ class HelperTest extends TestCase
     public function testGetMinimumMustReturnMinimumMinusOneIfExclusiveMinimumTrue()
     {
         $minimum = 300;
-        $schema = (object)['exclusiveMinimum' => true, 'minimum' => $minimum];
+        $schema = (object) ['exclusiveMinimum' => true, 'minimum' => $minimum];
 
         $actual = \JSONSchemaFaker\getMinimum($schema);
 
@@ -76,7 +78,7 @@ class HelperTest extends TestCase
     public function testGetMinimumMustReturnMinimumIfExclusiveMinimumFalse()
     {
         $minimum = 300;
-        $schema = (object)['exclusiveMinimum' => false, 'minimum' => $minimum];
+        $schema = (object) ['exclusiveMinimum' => false, 'minimum' => $minimum];
 
         $actual = \JSONSchemaFaker\getMinimum($schema);
 
@@ -86,7 +88,7 @@ class HelperTest extends TestCase
     public function testGetMinimumMustReturnMinimumIfExclusiveMinimumAbsent()
     {
         $minimum = 300;
-        $schema = (object)['minimum' => $minimum];
+        $schema = (object) ['minimum' => $minimum];
 
         $actual = \JSONSchemaFaker\getMinimum($schema);
 
@@ -96,7 +98,7 @@ class HelperTest extends TestCase
     public function testGetMultipleOfMustReturnValueIfPresent()
     {
         $expected = 7;
-        $schema = (object)['multipleOf' => $expected];
+        $schema = (object) ['multipleOf' => $expected];
 
         $actual = \JSONSchemaFaker\getMultipleOf($schema);
 
@@ -106,7 +108,7 @@ class HelperTest extends TestCase
     public function testGetMultipleOfMustReturnOneIfAbsent()
     {
         $expected = 1;
-        $schema = (object)[];
+        $schema = (object) [];
 
         $actual = \JSONSchemaFaker\getMultipleOf($schema);
 
@@ -125,7 +127,7 @@ class HelperTest extends TestCase
      */
     public function testGetFormattedValueMustReturnValidValue($format)
     {
-        $schema = (object)['type' => 'string', 'format' => $format];
+        $schema = (object) ['type' => 'string', 'format' => $format];
         $validator = new Validator();
 
         $actual = \JSONSchemaFaker\getFormattedValue($schema);
@@ -134,12 +136,11 @@ class HelperTest extends TestCase
         $this->assertTrue($validator->isValid());
     }
 
-    /**
-     * @expectedException Exception
-     */
     public function testGetFormattedValueMustThrowExceptionIfInvalidFormat()
     {
-        \JSONSchemaFaker\getFormattedValue((object)['format' => 'xxxxx']);
+        $this->expectException(\Exception::class);
+
+        \JSONSchemaFaker\getFormattedValue((object) ['format' => 'xxxxx']);
     }
 
     public function testGetPropertiesMust()

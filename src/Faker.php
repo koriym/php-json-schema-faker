@@ -1,19 +1,16 @@
 <?php
-/**
- * JSON Schema faker
- *
- * @see https://github.com/Leko/php-json-schema-faker
- */
+
+declare(strict_types=1);
+
 
 namespace JSONSchemaFaker;
 
-use a;
+use function dirname;
 use Faker\Factory;
 use Faker\Provider\Base;
 use Faker\Provider\DateTime;
 use Faker\Provider\Internet;
 use Faker\Provider\Lorem;
-use function dirname;
 use function file_get_contents;
 use function json_decode;
 use function substr;
@@ -29,23 +26,28 @@ class Faker
      * Create dummy data with JSON schema
      *
      * @see    http://json-schema.org
-     * @param  \SplFileInfo|\stdClass $schema Data structure writen in JSON Schema
+     *
+     * @param \SplFileInfo|\stdClass $schema Data structure writen in JSON Schema
+     *
      * @return mixed dummy data
      */
     public static function fake($schema)
     {
         $faker = new static();
+
         return $faker->generate($schema);
     }
 
     /**
      * Create dummy data with JSON schema
      *
-     * @param  \SplFileInfo|\stdClass $schema Data structure writen in JSON Schema
-     * @param \stdClass $parentSchema parent schema when it is subschema
-     * @param string $schemaDir forced directory in object loop
-     * @return mixed dummy data
+     * @param \SplFileInfo|\stdClass $schema       Data structure writen in JSON Schema
+     * @param \stdClass              $parentSchema parent schema when it is subschema
+     * @param string                 $schemaDir    forced directory in object loop
+     *
      * @throws \Exception Throw when unsupported type specified
+     *
+     * @return mixed dummy data
      */
     public function generate($schema, \stdClass $parentSchema = null, string $schemaDir = null)
     {
@@ -70,30 +72,67 @@ class Faker
             return Base::randomElement($schema->enum);
         }
 
-        if (!isset($fakers[$type])) {
+        if (! isset($fakers[$type])) {
             throw new \Exception("Unsupported type: {$type}");
         }
 
         return $fakers[$type]($schema);
     }
 
+    public function mergeObject()
+    {
+        $merged = [];
+        $objList = func_get_args();
+
+        foreach ($objList as $obj) {
+            $merged = array_merge($merged, (array) $obj);
+        }
+
+        return (object) $merged;
+    }
+
+    public function getMaximum($schema) : int
+    {
+        $offset = ($schema->exclusiveMaximum ?? false) ? 1 : 0;
+
+        return (int) ($schema->maximum ?? mt_getrandmax()) - $offset;
+    }
+
+    public function getMinimum($schema) : int
+    {
+        $offset = ($schema->exclusiveMinimum ?? false) ? 1 : 0;
+
+        return (int) ($schema->minimum ?? -mt_getrandmax()) + $offset;
+    }
+
+    public function resolveDependencies(\stdClass $schema, array $keys) : array
+    {
+        $resolved = [];
+        $dependencies = $schema->dependencies ?? new \stdClass();
+
+        foreach ($keys as $key) {
+            $resolved = array_merge($resolved, [$key], $dependencies->{$key} ?? []);
+        }
+
+        return $resolved;
+    }
+
     private function getFakers()
     {
         return [
-            'null'    => [$this, 'fakeNull'],
+            'null' => [$this, 'fakeNull'],
             'boolean' => [$this, 'fakeBoolean'],
             'integer' => [$this, 'fakeInteger'],
-            'number'  => [$this, 'fakeNumber'],
-            'string'  => [$this, 'fakeString'],
-            'array'   => [$this, 'fakeArray'],
-            'object'  => [$this, 'fakeObject']
+            'number' => [$this, 'fakeNumber'],
+            'string' => [$this, 'fakeString'],
+            'array' => [$this, 'fakeArray'],
+            'object' => [$this, 'fakeObject']
         ];
     }
 
     /**
      * Create null
      *
-     * @return null
      * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
      */
     private function fakeNull()
@@ -115,7 +154,8 @@ class Faker
     /**
      * Create dummy integer with JSON schema
      *
-     * @param  \stdClass $schema Data structure
+     * @param \stdClass $schema Data structure
+     *
      * @return int
      * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
      */
@@ -125,13 +165,14 @@ class Faker
         $maximum = $this->getMaximum($schema);
         $multipleOf = $this->getMultipleOf($schema);
 
-        return (int)Base::numberBetween($minimum, $maximum) * $multipleOf;
+        return (int) Base::numberBetween($minimum, $maximum) * $multipleOf;
     }
 
     /**
      * Create dummy floating number with JSON schema
      *
-     * @param  \stdClass $schema Data structure
+     * @param \stdClass $schema Data structure
+     *
      * @return float
      * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
      */
@@ -146,6 +187,7 @@ class Faker
 
     /**
      * @param \stdClass $schema Data structure
+     *
      * @return string
      * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
      */
@@ -153,32 +195,33 @@ class Faker
     {
         if (isset($schema->format)) {
             return $this->getFormattedValue($schema);
-        } elseif (isset($schema->pattern)) {
-            return Lorem::regexify($schema->pattern);
-        } else {
-            $min = $schema->minLength ?? 1;
-            $max = $schema->maxLength ?? max(5, $min + 1);
-            if ($max < 5) {
-                return substr(Lorem::text(5), 0, $max);
-            }
-            $lorem = Lorem::text($max);
-
-            if (mb_strlen($lorem) < $min) {
-                $lorem = str_repeat($lorem, $min);
-            }
-
-            return mb_substr($lorem, 0, $max);
         }
+        if (isset($schema->pattern)) {
+            return Lorem::regexify($schema->pattern);
+        }
+        $min = $schema->minLength ?? 1;
+        $max = $schema->maxLength ?? max(5, $min + 1);
+        if ($max < 5) {
+            return substr(Lorem::text(5), 0, $max);
+        }
+        $lorem = Lorem::text($max);
+
+        if (mb_strlen($lorem) < $min) {
+            $lorem = str_repeat($lorem, $min);
+        }
+
+        return mb_substr($lorem, 0, $max);
     }
 
     /**
      * @param \stdClass $schema Data structure
+     *
      * @return array
      * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
      */
     private function fakeArray(\stdClass $schema)
     {
-        if (!isset($schema->items)) {
+        if (! isset($schema->items)) {
             $subschemas = [$this->getRandomSchema()];
         // List
         } elseif (is_object($schema->items)) {
@@ -187,7 +230,7 @@ class Faker
         } elseif (is_array($schema->items)) {
             $subschemas = $schema->items;
         } else {
-            throw new \Exception("Invalid items");
+            throw new \Exception('Invalid items');
         }
 
         $dummies = [];
@@ -199,11 +242,13 @@ class Faker
             $dummies[] = $this->generate($subschema, $schema, $dir);
         }
         $this->schemaDir = $dir;
+
         return ($schema->uniqueItems ?? false) ? array_unique($dummies) : $dummies;
     }
 
     /**
-     * @param  \stdClass $schema Data structure
+     * @param \stdClass $schema Data structure
+     *
      * @return \stdClass
      * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
      */
@@ -225,6 +270,7 @@ class Faker
             $dummy->{$key} = $this->generate($subschema, $schema, $schemaDir);
         }
         $this->schemaDir = $dir;
+
         return $dummy;
     }
 
@@ -232,7 +278,7 @@ class Faker
     {
         $fakerNames = array_keys($this->getFakers());
 
-        return (object)[
+        return (object) [
             'type' => Base::randomElement($fakerNames)
         ];
     }
@@ -240,39 +286,16 @@ class Faker
     private function resolveOf(\stdClass $schema)
     {
         if (isset($schema->allOf)) {
-            return call_user_func_array(__NAMESPACE__.'\mergeObject', $schema->allOf);
+            return call_user_func_array(__NAMESPACE__ . '\mergeObject', $schema->allOf);
         }
         if (isset($schema->anyOf)) {
-            return call_user_func_array(__NAMESPACE__.'\mergeObject', Base::randomElements($schema->anyOf));
+            return call_user_func_array(__NAMESPACE__ . '\mergeObject', Base::randomElements($schema->anyOf));
         }
         if (isset($schema->oneOf)) {
             return Base::randomElement($schema->oneOf);
         }
+
         return $schema;
-    }
-
-    function mergeObject()
-    {
-        $merged = [];
-        $objList = func_get_args();
-
-        foreach ($objList as $obj) {
-            $merged = array_merge($merged, (array)$obj);
-        }
-
-        return (object)$merged;
-    }
-
-    function getMaximum($schema) : int
-    {
-        $offset = ($schema->exclusiveMaximum ?? false) ? 1 : 0;
-        return (int)($schema->maximum ?? mt_getrandmax()) - $offset;
-    }
-
-    function getMinimum($schema) : int
-    {
-        $offset = ($schema->exclusiveMinimum ?? false) ? 1 : 0;
-        return (int)($schema->minimum ?? -mt_getrandmax()) + $offset;
     }
 
     private function getMultipleOf($schema) : int
@@ -311,18 +334,6 @@ class Faker
         }
     }
 
-    function resolveDependencies(\stdClass $schema, array $keys) : array
-    {
-        $resolved = [];
-        $dependencies = $schema->dependencies ?? new \stdClass();
-
-        foreach ($keys as $key) {
-            $resolved = array_merge($resolved, [$key], $dependencies->{$key} ?? []);
-        }
-
-        return $resolved;
-    }
-
     /**
      * @return string[] Property names
      */
@@ -337,10 +348,10 @@ class Faker
 
         $additionalProperties = $schema->additionalProperties ?? true;
         $patternProperties = $schema->patternProperties ?? new \stdClass();
-        $patterns = array_keys((array)$patternProperties);
+        $patterns = array_keys((array) $patternProperties);
         while (count($propertyNames) < ($schema->minProperties ?? 0)) {
             $name = $additionalProperties ? Lorem::word() : Lorem::regexify(Base::randomElement($patterns));
-            if (!in_array($name, $propertyNames)) {
+            if (! in_array($name, $propertyNames, true)) {
                 $propertyNames[] = $name;
             }
         }
