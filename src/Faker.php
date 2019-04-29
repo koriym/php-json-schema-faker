@@ -212,7 +212,7 @@ class Faker
         return null;
     }
 
-    private function fakeBoolean()
+    private function fakeBoolean() : bool
     {
         return Base::randomElement([true, false]);
     }
