@@ -1,15 +1,20 @@
 {
-    "name": "leko/json-schema-faker",
-    "description": "Create dummy data with JSON schema",
+    "name": "koriym/json-schema-faker",
+    "description": "Generates fake JSON by JSON schema",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
             "name": "Leko",
             "email": "leko.noor@gmail.com"
+        },
+        {
+            "name": "Akhito Koriyama",
+            "email": "akihito.koriyama@gmail.com"
         }
     ],
     "require": {
+        "php": ">=7.1.0",
         "ext-json": "*",
         "ext-mbstring": "*",
         "fzaninotto/faker": "^1.7"
