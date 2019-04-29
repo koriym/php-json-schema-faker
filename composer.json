@@ -46,6 +46,6 @@
         ]
     },
     "bin": [
-        "bin/fakejsons.php"
+        "bin/fakejsons"
     ]
 }
