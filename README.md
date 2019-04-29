@@ -26,7 +26,7 @@ or
 
 ```php
 // pass SplFileInfo to support local $ref schema file
-$dummy = (new Faker)->generate(new SplFileInfo(__DIR__ . '/schema.json'));
+$fake = (new Faker)->generate(new SplFileInfo(__DIR__ . '/schema.json'));
 ```
 
 ### Command
