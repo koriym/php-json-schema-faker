@@ -4,6 +4,9 @@
 
 Generates fake JSON by JSON schema.
 
+ * `$ref` supported
+ * CLI command available
+
 forked from [leko/json-schema-faker](https://github.com/Leko/php-json-schema-faker) (deprecated)
 
 ## Getting started
