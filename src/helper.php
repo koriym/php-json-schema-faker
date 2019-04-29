@@ -13,19 +13,6 @@ use Faker\Provider\DateTime;
 use Faker\Provider\Internet;
 use Faker\Provider\Lorem;
 
-/**
- * Get value without E_NOTICE
- *
- * @param  \stdClass $obj     Target
- * @param  string $prop    Property name
- * @param  mixed  $default Value if $obj->{$prop} does not exist
- * @return mixed property value or default value
- */
-function get($obj, $prop, $default = null)
-{
-    return isset($obj->{$prop}) ? $obj->{$prop} : $default;
-}
-
 function mergeObject()
 {
     $merged = [];
@@ -60,8 +47,8 @@ function resolveOf(\stdClass $schema)
  */
 function getMaximum($schema)
 {
-    $offset = get($schema, 'exclusiveMaximum', false) ? 1 : 0;
-    return (int)(get($schema, 'maximum', mt_getrandmax()) - $offset);
+    $offset = ($schema->exclusiveMaximum ?? false) ? 1 : 0;
+    return (int)($schema->maximum ?? mt_getrandmax()) - $offset;
 }
 
 /**
@@ -72,8 +59,8 @@ function getMaximum($schema)
  */
 function getMinimum($schema)
 {
-    $offset = get($schema, 'exclusiveMinimum', false) ? 1 : 0;
-    return (int)(get($schema, 'minimum', -mt_getrandmax()) + $offset);
+    $offset = ($schema->exclusiveMinimum ?? false) ? 1 : 0;
+    return (int)($schema->minimum ?? -mt_getrandmax()) + $offset;
 }
 
 /**
@@ -84,7 +71,7 @@ function getMinimum($schema)
  */
 function getMultipleOf($schema)
 {
-    return get($schema, 'multipleOf', 1);
+    return $schema->multipleOf ?? 1;
 }
 
 function getInternetFakerInstance()
@@ -127,10 +114,10 @@ function getFormattedValue($schema)
 function resolveDependencies(\stdClass $schema, array $keys)
 {
     $resolved = [];
-    $dependencies = get($schema, 'dependencies', new \stdClass());
+    $dependencies = $schema->dependencies ?? new \stdClass();
 
     foreach ($keys as $key) {
-        $resolved = array_merge($resolved, [$key], get($dependencies, $key, []));
+        $resolved = array_merge($resolved, [$key], $dependencies->{$key} ?? []);
     }
 
     return $resolved;
@@ -141,17 +128,17 @@ function resolveDependencies(\stdClass $schema, array $keys)
  */
 function getProperties(\stdClass $schema)
 {
-    $requiredKeys = get($schema, 'required', []);
-    $optionalKeys = array_keys((array)get($schema, 'properties', new \stdClass()));
-    $maxProperties = get($schema, 'maxProperties', count($optionalKeys) - count($requiredKeys));
+    $requiredKeys = $schema->required ?? [];
+    $optionalKeys = array_keys((array) ($schema->properties ?? new \stdClass()));
+    $maxProperties = $schema->maxProperties ?? count($optionalKeys) - count($requiredKeys);
     $pickSize = Base::numberBetween(0, min(count($optionalKeys), $maxProperties));
     $additionalKeys = resolveDependencies($schema, Base::randomElements($optionalKeys, $pickSize));
     $propertyNames = array_unique(array_merge($requiredKeys, $additionalKeys));
 
-    $additionalProperties = get($schema, 'additionalProperties', true);
-    $patternProperties = get($schema, 'patternProperties', new \stdClass());
+    $additionalProperties = $schema->additionalProperties ?? true;
+    $patternProperties = $schema->patternProperties ?? new \stdClass();
     $patterns = array_keys((array)$patternProperties);
-    while (count($propertyNames) < get($schema, 'minProperties', 0)) {
+    while (count($propertyNames) < ($schema->minProperties ?? 0)) {
         $name = $additionalProperties ? Lorem::word() : Lorem::regexify(Base::randomElement($patterns));
         if (!in_array($name, $propertyNames)) {
             $propertyNames[] = $name;
@@ -163,8 +150,8 @@ function getProperties(\stdClass $schema)
 
 function getAdditionalPropertySchema(\stdClass $schema, $property)
 {
-    $patternProperties = get($schema, 'patternProperties', new \stdClass());
-    $additionalProperties = get($schema, 'additionalProperties', true);
+    $patternProperties = $schema->patternProperties ?? new \stdClass();
+    $additionalProperties = $schema->additionalProperties ?? true;
 
     foreach ($patternProperties as $pattern => $sub) {
         if (preg_match("/{$pattern}/", $property)) {
