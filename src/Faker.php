@@ -17,7 +17,7 @@ use function is_callable;
 use function json_decode;
 use function substr;
 
-class Faker
+final class Faker
 {
     /**
      * type-fake method map

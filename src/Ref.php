@@ -9,7 +9,7 @@ use function file_exists;
 use function realpath;
 use function substr;
 
-class Ref
+final class Ref
 {
     /**
      * @var Faker
