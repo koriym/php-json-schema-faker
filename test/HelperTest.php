@@ -5,40 +5,19 @@ declare(strict_types=1);
 namespace JSONSchemaFaker\Test;
 
 use JsonSchema\Validator;
+use JSONSchemaFaker\Faker;
 
 /**
  * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  */
 class HelperTest extends TestCase
 {
-    public function testGetMustReturnPropertyValueIfExists()
-    {
-        $expected = 123;
-        $obj = (object) ['xxx' => $expected];
-        $key = 'xxx';
-
-        $actual = \JSONSchemaFaker\get($obj, $key);
-
-        $this->assertSame($actual, $expected);
-    }
-
-    public function testGetMustReturnDefaultValueIfNotExists()
-    {
-        $expected = 123;
-        $obj = (object) ['xxx' => $expected];
-        $key = 'aaa';
-
-        $actual = \JSONSchemaFaker\get($obj, $key, $expected);
-
-        $this->assertSame($actual, $expected);
-    }
-
     public function testGetMaximumMustReturnMaximumMinusOneIfExclusiveMaximumTrue()
     {
         $maximum = 300;
         $schema = (object) ['exclusiveMaximum' => true, 'maximum' => $maximum];
 
-        $actual = \JSONSchemaFaker\getMaximum($schema);
+        $actual = (new Faker)->getMaximum($schema);
 
         // -1 mean exclusive
         $this->assertSame($actual, $maximum - 1);
@@ -49,7 +28,7 @@ class HelperTest extends TestCase
         $maximum = 300;
         $schema = (object) ['exclusiveMaximum' => false, 'maximum' => $maximum];
 
-        $actual = \JSONSchemaFaker\getMaximum($schema);
+        $actual = (new Faker)->getMaximum($schema);
 
         $this->assertSame($actual, $maximum);
     }
@@ -59,7 +38,7 @@ class HelperTest extends TestCase
         $maximum = 300;
         $schema = (object) ['maximum' => $maximum];
 
-        $actual = \JSONSchemaFaker\getMaximum($schema);
+        $actual = (new Faker)->getMaximum($schema);
 
         $this->assertSame($actual, $maximum);
     }
@@ -69,7 +48,7 @@ class HelperTest extends TestCase
         $minimum = 300;
         $schema = (object) ['exclusiveMinimum' => true, 'minimum' => $minimum];
 
-        $actual = \JSONSchemaFaker\getMinimum($schema);
+        $actual = (new Faker)->getMinimum($schema);
 
         // +1 mean exclusive
         $this->assertSame($actual, $minimum + 1);
@@ -80,7 +59,7 @@ class HelperTest extends TestCase
         $minimum = 300;
         $schema = (object) ['exclusiveMinimum' => false, 'minimum' => $minimum];
 
-        $actual = \JSONSchemaFaker\getMinimum($schema);
+        $actual = (new Faker)->getMinimum($schema);
 
         $this->assertSame($actual, $minimum);
     }
@@ -90,7 +69,7 @@ class HelperTest extends TestCase
         $minimum = 300;
         $schema = (object) ['minimum' => $minimum];
 
-        $actual = \JSONSchemaFaker\getMinimum($schema);
+        $actual = (new Faker)->getMinimum($schema);
 
         $this->assertSame($actual, $minimum);
     }
@@ -100,7 +79,7 @@ class HelperTest extends TestCase
         $expected = 7;
         $schema = (object) ['multipleOf' => $expected];
 
-        $actual = \JSONSchemaFaker\getMultipleOf($schema);
+        $actual = (new Faker)->getMultipleOf($schema);
 
         $this->assertSame($actual, $expected);
     }
@@ -110,14 +89,14 @@ class HelperTest extends TestCase
         $expected = 1;
         $schema = (object) [];
 
-        $actual = \JSONSchemaFaker\getMultipleOf($schema);
+        $actual = (new Faker)->getMultipleOf($schema);
 
         $this->assertSame($actual, $expected);
     }
 
     public function testGetInternetFakerInstanceMustReturnInstance()
     {
-        $actual = \JSONSchemaFaker\getInternetFakerInstance();
+        $actual = (new Faker)->getInternetFakerInstance();
 
         $this->assertTrue($actual instanceof \Faker\Provider\Internet);
     }
@@ -130,7 +109,7 @@ class HelperTest extends TestCase
         $schema = (object) ['type' => 'string', 'format' => $format];
         $validator = new Validator();
 
-        $actual = \JSONSchemaFaker\getFormattedValue($schema);
+        $actual = (new Faker)->getFormattedValue($schema);
         $validator->check($actual, $schema);
 
         $this->assertTrue($validator->isValid());
@@ -140,7 +119,7 @@ class HelperTest extends TestCase
     {
         $this->expectException(\Exception::class);
 
-        \JSONSchemaFaker\getFormattedValue((object) ['format' => 'xxxxx']);
+        (new Faker)->getFormattedValue((object) ['format' => 'xxxxx']);
     }
 
     public function testGetPropertiesMust()

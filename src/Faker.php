@@ -274,7 +274,7 @@ class Faker
         return $dummy;
     }
 
-    private function getRandomSchema()
+    public function getRandomSchema()
     {
         $fakerNames = array_keys($this->getFakers());
 
@@ -283,13 +283,13 @@ class Faker
         ];
     }
 
-    private function resolveOf(\stdClass $schema)
+    public function resolveOf(\stdClass $schema)
     {
         if (isset($schema->allOf)) {
-            return call_user_func_array(__NAMESPACE__ . '\mergeObject', $schema->allOf);
+            return call_user_func_array([$this,'mergeObject'], $schema->allOf);
         }
         if (isset($schema->anyOf)) {
-            return call_user_func_array(__NAMESPACE__ . '\mergeObject', Base::randomElements($schema->anyOf));
+            return call_user_func_array([$this,'mergeObject'], Base::randomElements($schema->anyOf));
         }
         if (isset($schema->oneOf)) {
             return Base::randomElement($schema->oneOf);
@@ -298,17 +298,17 @@ class Faker
         return $schema;
     }
 
-    private function getMultipleOf($schema) : int
+    public function getMultipleOf($schema) : int
     {
         return $schema->multipleOf ?? 1;
     }
 
-    private function getInternetFakerInstance() : Internet
+    public function getInternetFakerInstance() : Internet
     {
         return new Internet(Factory::create());
     }
 
-    private function getFormattedValue($schema)
+    public function getFormattedValue($schema)
     {
         switch ($schema->format) {
             // Date representation, as defined by RFC 3339, section 5.6.
@@ -337,7 +337,7 @@ class Faker
     /**
      * @return string[] Property names
      */
-    private function getProperties(\stdClass $schema) : array
+    public function getProperties(\stdClass $schema) : array
     {
         $requiredKeys = $schema->required ?? [];
         $optionalKeys = array_keys((array) ($schema->properties ?? new \stdClass()));
@@ -359,7 +359,7 @@ class Faker
         return $propertyNames;
     }
 
-    private function getAdditionalPropertySchema(\stdClass $schema, $property) : array
+    private function getAdditionalPropertySchema(\stdClass $schema, $property)
     {
         $patternProperties = $schema->patternProperties ?? new \stdClass();
         $additionalProperties = $schema->additionalProperties ?? true;
