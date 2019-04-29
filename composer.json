@@ -44,5 +44,8 @@
         "cs-fix": [
             "php-cs-fixer fix -v"
         ]
-    }
+    },
+    "bin": [
+        "bin/fakejsons.php"
+    ]
 }

@@ -12,6 +12,8 @@ forked from [leko/json-schema-faker](https://github.com/Leko/php-json-schema-fak
 composer require koriym/json-schema-faker
 ```
 
+### Usage
+
 ```php
 $schema = json_decode(file_get_contents(__DIR__ . '/schema.json'));
 $fake = (new Faker)->generate($schema);
@@ -20,4 +22,11 @@ $fake = (new Faker)->generate($schema);
 ```php
 // to to support local $ref schema file
 $dummy = (new Faker)->generate(new SplFileInfo(__DIR__ . '/schema.json'));
+```
+
+### Command
+
+```
+// convert all json schema jsons in the directory
+./vendor/bin/fakejsons {$soruceDir} {$disDir}
 ```
