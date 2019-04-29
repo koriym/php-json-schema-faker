@@ -11,6 +11,7 @@ use Faker\Provider\Base;
 use Faker\Provider\DateTime;
 use Faker\Provider\Internet;
 use Faker\Provider\Lorem;
+use function file_exists;
 use function file_get_contents;
 use function json_decode;
 use function substr;
@@ -51,8 +52,10 @@ class Faker
     public function generate($schema, \stdClass $parentSchema = null, string $schemaDir = null)
     {
         if ($schema instanceof \SplFileInfo) {
-            $file = $schema->getRealPath();
-            $this->schemaDir = dirname($file);
+            $file = (string) $schema->getRealPath();
+            if (file_exists($file)) {
+                $this->schemaDir = dirname($file);
+            }
             $schema = json_decode(file_get_contents($file));
         }
         if (! $schema instanceof \stdClass) {
