@@ -6,7 +6,9 @@ namespace JSONSchemaFaker;
 
 use function dirname;
 use function file_exists;
+use function is_int;
 use function realpath;
+use function strpos;
 use function substr;
 
 final class Ref
@@ -53,6 +55,9 @@ final class Ref
         $jsonFileName = substr($path, 0, 2) === './' ? substr($path, 2) : $path;
         $jsonPath = sprintf('%s/%s', $this->schemaDir, $jsonFileName);
         $realPath = (string) realpath($jsonPath);
+        if (is_int(strpos($jsonPath, '#'))) {
+            return $this->inlineRefInExternalRef($jsonPath);
+        }
         if (! file_exists($jsonPath)) {
             throw new \RuntimeException("JSON file not exits:{$jsonPath}");
         }
