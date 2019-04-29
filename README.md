@@ -19,8 +19,10 @@ $schema = json_decode(file_get_contents(__DIR__ . '/schema.json'));
 $fake = (new Faker)->generate($schema);
 ```
 
+or
+
 ```php
-// to to support local $ref schema file
+// pass SplFileInfo to support local $ref schema file
 $dummy = (new Faker)->generate(new SplFileInfo(__DIR__ . '/schema.json'));
 ```
 
