@@ -22,21 +22,6 @@ class Faker
      */
     private $schemaDir;
 
-    /**
-     * Create dummy data with JSON schema
-     *
-     * @see    http://json-schema.org
-     *
-     * @param \SplFileInfo|\stdClass $schema Data structure written in JSON Schema
-     *
-     * @return mixed dummy data
-     */
-    public static function fake($schema)
-    {
-        $faker = new static();
-
-        return $faker->generate($schema);
-    }
 
     /**
      * Create dummy data with JSON schema
