@@ -42,13 +42,14 @@ function resolveOf(\stdClass $schema)
 {
     if (isset($schema->allOf)) {
         return call_user_func_array(__NAMESPACE__.'\mergeObject', $schema->allOf);
-    } elseif (isset($schema->anyOf)) {
-        return call_user_func_array(__NAMESPACE__.'\mergeObject', Base::randomElements($schema->anyOf));
-    } elseif (isset($schema->oneOf)) {
-        return Base::randomElement($schema->oneOf);
-    } else {
-        return $schema;
     }
+    if (isset($schema->anyOf)) {
+        return call_user_func_array(__NAMESPACE__.'\mergeObject', Base::randomElements($schema->anyOf));
+    }
+    if (isset($schema->oneOf)) {
+        return Base::randomElement($schema->oneOf);
+    }
+    return $schema;
 }
 
 /**
