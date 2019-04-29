@@ -53,7 +53,7 @@ class Ref
     {
         $jsonFileName = substr($path, 0, 2) === './' ? substr($path, 2) : $path;
         $jsonPath = sprintf('%s/%s', $this->schemaDir, $jsonFileName);
-        $realPath = realpath($jsonPath);
+        $realPath = (string) realpath($jsonPath);
         if (! file_exists($jsonPath)) {
             throw new \RuntimeException("JSON file not exits:{$jsonPath}");
         }
