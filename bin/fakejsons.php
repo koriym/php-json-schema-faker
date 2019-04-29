@@ -1,0 +1,23 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use JSONSchemaFaker\FakeJsons;
+
+if (file_exists($a = dirname(__DIR__, 2) . '/autoload.php')) {
+    require_once $a;
+} else {
+    require_once dirname(__DIR__) . '/vendor/autoload.php';
+}
+
+if ($argc !== 3) {
+    echo 'usage: fakejsons <source-dir> <dist-dir>' . PHP_EOL;
+    exit(1);
+}
+[, $sourceDir, $disDir] = $argv;
+$source = realpath($sourceDir);
+$dist = realpath($disDir);
+
+(new FakeJsons)($sourceDir, $disDir);
+exit(0);
