@@ -7,7 +7,11 @@
 
 namespace JSONSchemaFaker;
 
+use a;
+use Faker\Factory;
 use Faker\Provider\Base;
+use Faker\Provider\DateTime;
+use Faker\Provider\Internet;
 use Faker\Provider\Lorem;
 use function dirname;
 use function file_get_contents;
@@ -117,9 +121,9 @@ class Faker
      */
     private function fakeInteger(\stdClass $schema)
     {
-        $minimum = getMinimum($schema);
-        $maximum = getMaximum($schema);
-        $multipleOf = getMultipleOf($schema);
+        $minimum = $this->getMinimum($schema);
+        $maximum = $this->getMaximum($schema);
+        $multipleOf = $this->getMultipleOf($schema);
 
         return (int)Base::numberBetween($minimum, $maximum) * $multipleOf;
     }
@@ -133,9 +137,9 @@ class Faker
      */
     private function fakeNumber(\stdClass $schema)
     {
-        $minimum = getMinimum($schema);
-        $maximum = getMaximum($schema);
-        $multipleOf = getMultipleOf($schema);
+        $minimum = $this->getMinimum($schema);
+        $maximum = $this->getMaximum($schema);
+        $multipleOf = $this->getMultipleOf($schema);
 
         return Base::randomFloat(null, $minimum, $maximum) * $multipleOf;
     }
@@ -148,7 +152,7 @@ class Faker
     private function fakeString(\stdClass $schema)
     {
         if (isset($schema->format)) {
-            return getFormattedValue($schema);
+            return $this->getFormattedValue($schema);
         } elseif (isset($schema->pattern)) {
             return Lorem::regexify($schema->pattern);
         } else {
@@ -207,7 +211,7 @@ class Faker
     {
         $dir = $this->schemaDir;
         $properties = $schema->properties ?? new \stdClass();
-        $propertyNames = getProperties($schema);
+        $propertyNames = $this->getProperties($schema);
 
         $dummy = new \stdClass();
         $schemaDir = $this->schemaDir;
@@ -215,7 +219,7 @@ class Faker
             if (isset($properties->{$key})) {
                 $subschema = $properties->{$key};
             } else {
-                $subschema = getAdditionalPropertySchema($schema, $key) ?: $this->getRandomSchema();
+                $subschema = $this->getAdditionalPropertySchema($schema, $key) ?: $this->getRandomSchema();
             }
 
             $dummy->{$key} = $this->generate($subschema, $schema, $schemaDir);
@@ -245,5 +249,118 @@ class Faker
             return Base::randomElement($schema->oneOf);
         }
         return $schema;
+    }
+
+    function mergeObject()
+    {
+        $merged = [];
+        $objList = func_get_args();
+
+        foreach ($objList as $obj) {
+            $merged = array_merge($merged, (array)$obj);
+        }
+
+        return (object)$merged;
+    }
+
+    function getMaximum($schema) : int
+    {
+        $offset = ($schema->exclusiveMaximum ?? false) ? 1 : 0;
+        return (int)($schema->maximum ?? mt_getrandmax()) - $offset;
+    }
+
+    function getMinimum($schema) : int
+    {
+        $offset = ($schema->exclusiveMinimum ?? false) ? 1 : 0;
+        return (int)($schema->minimum ?? -mt_getrandmax()) + $offset;
+    }
+
+    private function getMultipleOf($schema) : int
+    {
+        return $schema->multipleOf ?? 1;
+    }
+
+    private function getInternetFakerInstance() : Internet
+    {
+        return new Internet(Factory::create());
+    }
+
+    private function getFormattedValue($schema)
+    {
+        switch ($schema->format) {
+            // Date representation, as defined by RFC 3339, section 5.6.
+            case 'date-time':
+                return DateTime::dateTime()->format(DATE_RFC3339);
+            // Internet email address, see RFC 5322, section 3.4.1.
+            case 'email':
+                return $this->getInternetFakerInstance()->safeEmail();
+            // Internet host name, see RFC 1034, section 3.1.
+            case 'hostname':
+                return $this->getInternetFakerInstance()->domainName();
+            // IPv4 address, according to dotted-quad ABNF syntax as defined in RFC 2673, section 3.2.
+            case 'ipv4':
+                return $this->getInternetFakerInstance()->ipv4();
+            // IPv6 address, as defined in RFC 2373, section 2.2.
+            case 'ipv6':
+                return $this->getInternetFakerInstance()->ipv6();
+            // A universal resource identifier (URI), according to RFC3986.
+            case 'uri':
+                return $this->getInternetFakerInstance()->url();
+            default:
+                throw new \Exception("Unsupported type: {$schema->format}");
+        }
+    }
+
+    function resolveDependencies(\stdClass $schema, array $keys) : array
+    {
+        $resolved = [];
+        $dependencies = $schema->dependencies ?? new \stdClass();
+
+        foreach ($keys as $key) {
+            $resolved = array_merge($resolved, [$key], $dependencies->{$key} ?? []);
+        }
+
+        return $resolved;
+    }
+
+    /**
+     * @return string[] Property names
+     */
+    private function getProperties(\stdClass $schema) : array
+    {
+        $requiredKeys = $schema->required ?? [];
+        $optionalKeys = array_keys((array) ($schema->properties ?? new \stdClass()));
+        $maxProperties = $schema->maxProperties ?? count($optionalKeys) - count($requiredKeys);
+        $pickSize = Base::numberBetween(0, min(count($optionalKeys), $maxProperties));
+        $additionalKeys = $this->resolveDependencies($schema, Base::randomElements($optionalKeys, $pickSize));
+        $propertyNames = array_unique(array_merge($requiredKeys, $additionalKeys));
+
+        $additionalProperties = $schema->additionalProperties ?? true;
+        $patternProperties = $schema->patternProperties ?? new \stdClass();
+        $patterns = array_keys((array)$patternProperties);
+        while (count($propertyNames) < ($schema->minProperties ?? 0)) {
+            $name = $additionalProperties ? Lorem::word() : Lorem::regexify(Base::randomElement($patterns));
+            if (!in_array($name, $propertyNames)) {
+                $propertyNames[] = $name;
+            }
+        }
+
+        return $propertyNames;
+    }
+
+    private function getAdditionalPropertySchema(\stdClass $schema, $property) : array
+    {
+        $patternProperties = $schema->patternProperties ?? new \stdClass();
+        $additionalProperties = $schema->additionalProperties ?? true;
+
+        foreach ($patternProperties as $pattern => $sub) {
+            if (preg_match("/{$pattern}/", $property)) {
+                return $sub;
+            }
+        }
+
+        if (is_object($additionalProperties)) {
+            return $additionalProperties;
+        }
     }
 }

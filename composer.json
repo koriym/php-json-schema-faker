@@ -21,9 +21,6 @@
         "phpunit/phpunit": "^5.4"
     },
     "autoload": {
-        "files": [
-            "./src/helper.php"
-        ],
         "psr-4": {
             "JSONSchemaFaker\\": "src/"
         }
