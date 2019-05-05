@@ -30,9 +30,11 @@ final class Ref
     public function __invoke(\stdClass $schema, \stdClass $parentSchema = null)
     {
         $path = (string) $schema->{'$ref'};
-        if ($path[0] === '#' && $parentSchema instanceof \stdClass) {
+        if ($path[0] === '#') {
+            $parentSchema = $parentSchema instanceof \stdClass ? $parentSchema : $schema;
             return $this->inlineRef($parentSchema, $path);
         }
+
 
         return $this->externalRef($path, $parentSchema);
     }
