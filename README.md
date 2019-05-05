@@ -4,6 +4,9 @@
 
 Generates fake JSON with JSON schema.
 
+ * `$ref` supported
+ * CLI command available
+
 forked from [leko/json-schema-faker](https://github.com/Leko/php-json-schema-faker) (deprecated)
 
 ## Getting started
@@ -23,7 +26,7 @@ or
 
 ```php
 // pass SplFileInfo to support local $ref schema file
-$dummy = (new Faker)->generate(new SplFileInfo(__DIR__ . '/schema.json'));
+$fake = (new Faker)->generate(new SplFileInfo(__DIR__ . '/schema.json'));
 ```
 
 ### Command
