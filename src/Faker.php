@@ -72,6 +72,10 @@ final class Faker
             return Base::randomElement($schema->enum);
         }
 
+        if (isset($schema->const)) {
+            return Base::randomElement([$schema->const]);
+        }
+
         if (! isset($this->fakers[$type])) {
             throw new UnsupportedTypeException($type);
         }
