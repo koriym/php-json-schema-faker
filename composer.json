@@ -17,7 +17,7 @@
         "php": ">=7.1.0",
         "ext-json": "*",
         "ext-mbstring": "*",
-        "fzaninotto/faker": "^1.7"
+        "fakerphp/faker": "^1.13"
     },
     "require-dev": {
         "justinrainbow/json-schema": "^5.2.8",
