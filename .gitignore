@@ -3,3 +3,4 @@ composer.lock
 clover.xml
 .idea
 tests/dist
+.php_cs.cache
