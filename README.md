@@ -34,5 +34,5 @@ $fake = (new Faker)->generate(new SplFileInfo(__DIR__ . '/schema.json'));
 
 ```
 // convert all json schema jsons in the directory
-./vendor/bin/fakejsons {$soruceDir} {$disDir}
+./vendor/bin/fakejsons {$soruceDir} {$distDir}
 ```
