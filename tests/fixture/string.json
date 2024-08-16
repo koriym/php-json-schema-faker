@@ -8,6 +8,7 @@
     "typeAndMinLengthAndMaxLength",
     "typeAndPattern",
     "typeAndFormat(date-time)",
+    "typeAndFormat(date)",
     "typeAndFormat(email)",
     "typeAndFormat(hostname)",
     "typeAndFormat(ipv4)",
@@ -42,6 +43,10 @@
     "typeAndFormat(date-time)": {
       "type": "string",
       "format": "date-time"
+    },
+    "typeAndFormat(date)": {
+      "type": "string",
+      "format": "date"
     },
     "typeAndFormat(email)": {
       "type": "string",

@@ -130,6 +130,7 @@ class HelperTest extends TestCase
     {
         return [
             ['date-time'],
+            ['date'],
             ['email'],
             ['hostname'],
             ['ipv4'],

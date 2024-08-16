@@ -166,6 +166,9 @@ final class Faker
             // Date representation, as defined by RFC 3339, section 5.6.
             case 'date-time':
                 return DateTime::dateTime()->format(DATE_RFC3339);
+            // Date representation, without time.
+            case 'date':
+                return DateTime::dateTime()->format('Y-m-d');
             // Internet email address, see RFC 5322, section 3.4.1.
             case 'email':
                 return $this->getInternetFakerInstance()->safeEmail();
