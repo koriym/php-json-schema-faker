@@ -1,6 +1,6 @@
 
 # PHP JSON Schema Faker
-![Continuous Integration](https://github.com/koriym/php-json-schema-faker/workflows/Continuous%20Integration/badge.svg)
+[![Coding Standards](https://github.com/koriym/php-json-schema-faker/actions/workflows/coding-standards.yml/badge.svg)](https://github.com/koriym/php-json-schema-faker/actions/workflows/coding-standards.yml)
 ![Coding Standards](https://github.com/koriym/php-json-schema-faker/workflows/Coding%20Standards/badge.svg)
 
 Generates fake JSON with JSON schema.
