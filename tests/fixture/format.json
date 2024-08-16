@@ -2,6 +2,8 @@
   "type": "object",
   "required": [
     "date-time",
+    "date",
+    "time",
     "email",
     "hostname",
     "ipv4",
@@ -12,6 +14,14 @@
     "date-time": {
       "type": "string",
       "format": "date-time"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "type": "string",
+      "format": "time"
     },
     "email": {
       "type": "string",
