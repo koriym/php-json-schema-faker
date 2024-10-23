@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace JSONSchemaFaker;
 
-class UnsupportedTypeException extends \RuntimeException
+use RuntimeException;
+
+class UnsupportedTypeException extends RuntimeException
 {
 }

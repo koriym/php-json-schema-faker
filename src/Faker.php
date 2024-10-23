@@ -4,18 +4,44 @@ declare(strict_types=1);
 
 namespace JSONSchemaFaker;
 
-use function call_user_func_array;
-use function dirname;
 use Faker\Factory;
 use Faker\Provider\Base;
 use Faker\Provider\DateTime;
 use Faker\Provider\Internet;
 use Faker\Provider\Lorem;
+use InvalidArgumentException;
+use LogicException;
+use SplFileInfo;
+use stdClass;
+
+use function array_keys;
+use function array_merge;
+use function array_slice;
+use function array_unique;
+use function call_user_func;
+use function call_user_func_array;
+use function count;
+use function dirname;
 use function file_exists;
 use function file_get_contents;
+use function func_get_args;
+use function gettype;
+use function in_array;
+use function is_array;
 use function is_callable;
+use function is_object;
 use function json_decode;
+use function max;
+use function mb_strlen;
+use function mb_substr;
+use function min;
+use function mt_getrandmax;
+use function preg_match;
+use function property_exists;
+use function str_repeat;
 use function substr;
+
+use const DATE_RFC3339;
 
 final class Faker
 {
@@ -31,41 +57,43 @@ final class Faker
         'number' => 'fakeNumber',
         'string' => 'fakeString',
         'array' => 'fakeArray',
-        'object' => 'fakeObject'
+        'object' => 'fakeObject',
     ];
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $schemaDir;
 
     /**
      * Create fake data with JSON schema
      *
-     * @param \SplFileInfo|\stdClass $schema       Data structure written in JSON Schema
-     * @param \stdClass              $parentSchema parent schema when it is subschema
-     * @param string                 $schemaDir    forced directory in object loop
+     * @param SplFileInfo|stdClass $schema       Data structure written in JSON Schema
+     * @param stdClass             $parentSchema parent schema when it is subschema
+     * @param string               $schemaDir    forced directory in object loop
      *
-     * @throws UnsupportedTypeException Throw when unsupported type specified
+     * @throws UnsupportedTypeException
      */
-    public function generate($schema, \stdClass $parentSchema = null, string $schemaDir = null)
+    public function generate($schema, ?stdClass $parentSchema = null, ?string $schemaDir = null)
     {
-        if ($schema instanceof \SplFileInfo) {
+        if ($schema instanceof SplFileInfo) {
             $file = (string) $schema->getRealPath();
             if (file_exists($file)) {
                 $this->schemaDir = dirname($file);
             }
+
             $schema = json_decode((string) file_get_contents($file));
         }
-        if (! $schema instanceof \stdClass) {
-            throw new \InvalidArgumentException(gettype($schema));
+
+        if (! $schema instanceof stdClass) {
+            throw new InvalidArgumentException(gettype($schema));
         }
+
         $schema = $this->resolveOf($schema);
         if (property_exists($schema, '$ref')) {
             $currentDir = $schemaDir ?? $this->schemaDir;
 
             return (new Ref($this, $currentDir))($schema, $parentSchema);
         }
+
         $type = is_array($schema->type) ? Base::randomElement($schema->type) : $schema->type;
 
         if (isset($schema->enum)) {
@@ -85,7 +113,7 @@ final class Faker
             return call_user_func($faker, $schema);
         }
 
-        throw new \LogicException;
+        throw new LogicException();
     }
 
     public function mergeObject()
@@ -100,24 +128,24 @@ final class Faker
         return (object) $merged;
     }
 
-    public function getMaximum($schema) : int
+    public function getMaximum($schema): int
     {
-        $offset = ($schema->exclusiveMaximum ?? false) ? 1 : 0;
+        $offset = $schema->exclusiveMaximum ?? false ? 1 : 0;
 
         return (int) ($schema->maximum ?? mt_getrandmax()) - $offset;
     }
 
-    public function getMinimum($schema) : int
+    public function getMinimum($schema): int
     {
-        $offset = ($schema->exclusiveMinimum ?? false) ? 1 : 0;
+        $offset = $schema->exclusiveMinimum ?? false ? 1 : 0;
 
         return (int) ($schema->minimum ?? -mt_getrandmax()) + $offset;
     }
 
-    public function resolveDependencies(\stdClass $schema, array $keys) : array
+    public function resolveDependencies(stdClass $schema, array $keys): array
     {
         $resolved = [];
-        $dependencies = $schema->dependencies ?? new \stdClass();
+        $dependencies = $schema->dependencies ?? new stdClass();
 
         foreach ($keys as $key) {
             $resolved = array_merge($resolved, [$key], $dependencies->{$key} ?? []);
@@ -131,18 +159,20 @@ final class Faker
         $fakerNames = array_keys($this->fakers);
 
         return (object) [
-            'type' => Base::randomElement($fakerNames)
+            'type' => Base::randomElement($fakerNames),
         ];
     }
 
-    public function resolveOf(\stdClass $schema) : \stdClass
+    public function resolveOf(stdClass $schema): stdClass
     {
         if (isset($schema->allOf)) {
             return call_user_func_array([$this, 'mergeObject'], $schema->allOf);
         }
+
         if (isset($schema->anyOf)) {
             return call_user_func_array([$this, 'mergeObject'], Base::randomElements($schema->anyOf));
         }
+
         if (isset($schema->oneOf)) {
             return Base::randomElement($schema->oneOf);
         }
@@ -150,12 +180,12 @@ final class Faker
         return $schema;
     }
 
-    public function getMultipleOf($schema) : int
+    public function getMultipleOf($schema): int
     {
         return $schema->multipleOf ?? 1;
     }
 
-    public function getInternetFakerInstance() : Internet
+    public function getInternetFakerInstance(): Internet
     {
         return new Internet(Factory::create());
     }
@@ -167,44 +197,50 @@ final class Faker
             case 'date-time':
                 return DateTime::dateTime()->format(DATE_RFC3339);
             // Date representation, without time.
+
             case 'date':
                 return DateTime::dateTime()->format('Y-m-d');
             // Time representation.
+
             case 'time':
                 return DateTime::dateTime()->format('H:i:s');
+
             case 'email':
                 return $this->getInternetFakerInstance()->safeEmail();
             // Internet host name, see RFC 1034, section 3.1.
+
             case 'hostname':
                 return $this->getInternetFakerInstance()->domainName();
             // IPv4 address, according to dotted-quad ABNF syntax as defined in RFC 2673, section 3.2.
+
             case 'ipv4':
                 return $this->getInternetFakerInstance()->ipv4();
             // IPv6 address, as defined in RFC 2373, section 2.2.
+
             case 'ipv6':
                 return $this->getInternetFakerInstance()->ipv6();
             // A universal resource identifier (URI), according to RFC3986.
+
             case 'uri':
                 return $this->getInternetFakerInstance()->url();
+
             default:
                 throw new UnsupportedTypeException("Unsupported type: {$schema->format}");
         }
     }
 
-    /**
-     * @return string[] Property names
-     */
-    public function getProperties(\stdClass $schema) : array
+    /** @return string[] Property names */
+    public function getProperties(stdClass $schema): array
     {
         $requiredKeys = $schema->required ?? [];
-        $optionalKeys = array_keys((array) ($schema->properties ?? new \stdClass()));
+        $optionalKeys = array_keys((array) ($schema->properties ?? new stdClass()));
         $maxProperties = $schema->maxProperties ?? count($optionalKeys) - count($requiredKeys);
         $pickSize = Base::numberBetween(0, min(count($optionalKeys), $maxProperties));
         $additionalKeys = $this->resolveDependencies($schema, Base::randomElements($optionalKeys, $pickSize));
         $propertyNames = array_unique(array_merge($requiredKeys, $additionalKeys));
 
         $additionalProperties = $schema->additionalProperties ?? true;
-        $patternProperties = $schema->patternProperties ?? new \stdClass();
+        $patternProperties = $schema->patternProperties ?? new stdClass();
         $patterns = array_keys((array) $patternProperties);
         while (count($propertyNames) < ($schema->minProperties ?? 0)) {
             $name = $additionalProperties ? Lorem::word() : Lorem::regexify(Base::randomElement($patterns));
@@ -221,12 +257,12 @@ final class Faker
         return null;
     }
 
-    private function fakeBoolean() : bool
+    private function fakeBoolean(): bool
     {
         return Base::randomElement([true, false]);
     }
 
-    private function fakeInteger(\stdClass $schema) : int
+    private function fakeInteger(stdClass $schema): int
     {
         $minimum = $this->getMinimum($schema);
         $maximum = $this->getMaximum($schema);
@@ -235,7 +271,7 @@ final class Faker
         return Base::numberBetween($minimum, $maximum) * $multipleOf;
     }
 
-    private function fakeNumber(\stdClass $schema)
+    private function fakeNumber(stdClass $schema)
     {
         $minimum = $this->getMinimum($schema);
         $maximum = $this->getMaximum($schema);
@@ -244,19 +280,22 @@ final class Faker
         return Base::randomFloat(null, $minimum, $maximum) * $multipleOf;
     }
 
-    private function fakeString(\stdClass $schema) : string
+    private function fakeString(stdClass $schema): string
     {
         if (isset($schema->format)) {
             return $this->getFormattedValue($schema);
         }
+
         if (isset($schema->pattern)) {
             return Lorem::regexify($schema->pattern);
         }
+
         $min = $schema->minLength ?? 1;
         $max = $schema->maxLength ?? max(5, $min + 1);
         if ($max < 5) {
             return substr(Lorem::text(5), 0, $max);
         }
+
         $lorem = Lorem::text($max);
 
         if (mb_strlen($lorem) < $min) {
@@ -266,18 +305,18 @@ final class Faker
         return mb_substr($lorem, 0, $max);
     }
 
-    private function fakeArray(\stdClass $schema) : array
+    private function fakeArray(stdClass $schema): array
     {
         if (! isset($schema->items)) {
             $subschemas = [$this->getRandomSchema()];
-        // List
+            // List
         } elseif (is_object($schema->items)) {
             $subschemas = [$schema->items];
-        // Tuple
+            // Tuple
         } elseif (is_array($schema->items)) {
             $subschemas = $schema->items;
         } else {
-            throw new InvalidItemsException;
+            throw new InvalidItemsException();
         }
 
         $dummies = [];
@@ -288,18 +327,19 @@ final class Faker
             $subschema = $subschemas[$i % count($subschemas)];
             $dummies[] = $this->generate($subschema, $schema, $dir);
         }
+
         $this->schemaDir = $dir;
 
-        return ($schema->uniqueItems ?? false) ? array_unique($dummies) : $dummies;
+        return $schema->uniqueItems ?? false ? array_unique($dummies) : $dummies;
     }
 
-    private function fakeObject(\stdClass $schema) : \stdClass
+    private function fakeObject(stdClass $schema): stdClass
     {
         $dir = $this->schemaDir;
-        $properties = $schema->properties ?? new \stdClass();
+        $properties = $schema->properties ?? new stdClass();
         $propertyNames = $this->getProperties($schema);
 
-        $dummy = new \stdClass();
+        $dummy = new stdClass();
         $schemaDir = $this->schemaDir;
         foreach ($propertyNames as $key) {
             if (isset($properties->{$key})) {
@@ -310,14 +350,15 @@ final class Faker
 
             $dummy->{$key} = $this->generate($subschema, $schema, $schemaDir);
         }
+
         $this->schemaDir = $dir;
 
         return $dummy;
     }
 
-    private function getAdditionalPropertySchema(\stdClass $schema, $property)
+    private function getAdditionalPropertySchema(stdClass $schema, $property)
     {
-        $patternProperties = $schema->patternProperties ?? new \stdClass();
+        $patternProperties = $schema->patternProperties ?? new stdClass();
         $additionalProperties = $schema->additionalProperties ?? true;
 
         foreach ($patternProperties as $pattern => $sub) {
