@@ -67,7 +67,7 @@ final class Ref
         }
 
         if (! file_exists($jsonPath)) {
-            throw new RuntimeException("JSON file not exits:{$jsonPath}");
+            throw new RuntimeException("External JSON schema file not found: {$jsonPath}");
         }
 
         if (! file_exists($realPath)) {
@@ -81,13 +81,13 @@ final class Ref
     {
         $paths = explode('#', $jsonPath);
         if (count($paths) !== 2) {
-            throw new RuntimeException("JSON file not exits:{$jsonPath}");
+            throw new RuntimeException("Invalid reference format in path: {$jsonPath}");
         }
 
         $schemaFile = $paths[0];
         $path = '.' . $paths[1];
         if (! file_exists($schemaFile)) {
-            throw new RuntimeException("JSON file not exits:{$jsonPath}");
+            throw new RuntimeException("Referenced schema file not found: {$schemaFile}");
         }
 
         $contents = file_get_contents($schemaFile);
