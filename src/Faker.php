@@ -164,30 +164,30 @@ final class Faker
     {
         switch ($schema->format) {
             // Date representation, as defined by RFC 3339, section 5.6.
-            case 'date-time':
-                return DateTime::dateTime()->format(DATE_RFC3339);
+        case 'date-time':
+            return DateTime::dateTime()->format(DATE_RFC3339);
             // Date representation, without time.
-            case 'date':
-                return DateTime::dateTime()->format('Y-m-d');
+        case 'date':
+            return DateTime::dateTime()->format('Y-m-d');
             // Time representation.
-            case 'time':
-                return DateTime::dateTime()->format('H:i:s');
-            case 'email':
-                return $this->getInternetFakerInstance()->safeEmail();
+        case 'time':
+            return DateTime::dateTime()->format('H:i:s');
+        case 'email':
+            return $this->getInternetFakerInstance()->safeEmail();
             // Internet host name, see RFC 1034, section 3.1.
-            case 'hostname':
-                return $this->getInternetFakerInstance()->domainName();
+        case 'hostname':
+            return $this->getInternetFakerInstance()->domainName();
             // IPv4 address, according to dotted-quad ABNF syntax as defined in RFC 2673, section 3.2.
-            case 'ipv4':
-                return $this->getInternetFakerInstance()->ipv4();
+        case 'ipv4':
+            return $this->getInternetFakerInstance()->ipv4();
             // IPv6 address, as defined in RFC 2373, section 2.2.
-            case 'ipv6':
-                return $this->getInternetFakerInstance()->ipv6();
+        case 'ipv6':
+            return $this->getInternetFakerInstance()->ipv6();
             // A universal resource identifier (URI), according to RFC3986.
-            case 'uri':
-                return $this->getInternetFakerInstance()->url();
-            default:
-                throw new UnsupportedTypeException("Unsupported type: {$schema->format}");
+        case 'uri':
+            return $this->getInternetFakerInstance()->url();
+        default:
+            throw new UnsupportedTypeException("Unsupported type: {$schema->format}");
         }
     }
 
@@ -270,10 +270,10 @@ final class Faker
     {
         if (! isset($schema->items)) {
             $subschemas = [$this->getRandomSchema()];
-        // List
+            // List
         } elseif (is_object($schema->items)) {
             $subschemas = [$schema->items];
-        // Tuple
+            // Tuple
         } elseif (is_array($schema->items)) {
             $subschemas = $schema->items;
         } else {

@@ -123,7 +123,6 @@ class HelperTest extends TestCase
     }
 
     /**
-     * @see testGetFormattedValueMustReturnValidValue
      * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
      */
     public function getFormats()
