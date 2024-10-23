@@ -35,17 +35,17 @@
         }
     },
     "scripts": {
-        "test": [
-            "phpunit tests/ --coverage-clover=clover.xml --whitelist=src"
-        ],
-        "cs": [
-            "./vendor/bin/php-cs-fixer fix -v --dry-run"
-        ],
-        "cs-fix": [
-            "./vendor/bin/php-cs-fixer fix -v"
-        ]
+        "test": "./vendor/bin/phpunit",
+        "tests": ["@cs", "@test"],
+        "cs": "./vendor/bin/phpcs",
+        "cs-fix": "./vendor/bin/phpcbf src tests"
     },
     "bin": [
         "bin/fakejsons"
-    ]
+    ],
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
 }
