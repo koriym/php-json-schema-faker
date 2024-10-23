@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace JSONSchemaFaker;
 
-class InvalidItemsException extends \RuntimeException
+use RuntimeException;
+
+class InvalidItemsException extends RuntimeException
 {
 }
