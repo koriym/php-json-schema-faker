@@ -90,7 +90,12 @@ final class Ref
             throw new RuntimeException("JSON file not exits:{$jsonPath}");
         }
 
-        $json = json_decode((string) file_get_contents($schemaFile));
+        $contents = file_get_contents($schemaFile);
+        if ($contents === false) {
+            throw new RuntimeException("Failed to read schema file: {$schemaFile}");
+        }
+
+        $json = json_decode($contents);
 
         return $this->inlineRef($json, $path);
     }
