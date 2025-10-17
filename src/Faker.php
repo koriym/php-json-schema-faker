@@ -18,6 +18,7 @@ use function array_keys;
 use function array_merge;
 use function array_slice;
 use function array_unique;
+use function array_values;
 use function call_user_func;
 use function call_user_func_array;
 use function count;
@@ -330,7 +331,7 @@ final class Faker
 
         $this->schemaDir = $dir;
 
-        return $schema->uniqueItems ?? false ? array_unique($dummies) : $dummies;
+        return $schema->uniqueItems ?? false ? array_values(array_unique($dummies)) : $dummies;
     }
 
     private function fakeObject(stdClass $schema): stdClass
