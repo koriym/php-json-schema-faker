@@ -14,15 +14,15 @@
         }
     ],
     "require": {
-        "php": ">=7.1.0",
+        "php": "^7.4 || ^8.0",
         "ext-json": "*",
         "ext-mbstring": "*",
-        "fakerphp/faker": "^1.13"
+        "fakerphp/faker": "^v1.24.1"
     },
     "require-dev": {
-        "justinrainbow/json-schema": "^6.0",
+        "justinrainbow/json-schema": "^6.6",
         "doctrine/coding-standard": "^12",
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.6.29"
     },
     "autoload": {
         "psr-4": {
