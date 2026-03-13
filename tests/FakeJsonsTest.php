@@ -8,8 +8,17 @@ use JsonSchema\Validator;
 use JSONSchemaFaker\FakeJsons;
 
 use function file_get_contents;
+use function file_put_contents;
+use function is_dir;
 use function json_decode;
+use function mkdir;
+use function ob_get_clean;
+use function ob_start;
+use function rmdir;
 use function sprintf;
+use function sys_get_temp_dir;
+use function uniqid;
+use function unlink;
 
 class FakeJsonsTest extends TestCase
 {
@@ -32,5 +41,30 @@ class FakeJsonsTest extends TestCase
         }
 
         $this->assertTrue($validator->isValid());
+    }
+
+    public function testInvokeWithInvalidSchema(): void
+    {
+        $tmpDir = sys_get_temp_dir() . '/json-schema-faker-test-' . uniqid();
+        $distDir = $tmpDir . '/dist';
+        $schemaDir = $tmpDir . '/schema';
+        mkdir($schemaDir, 0755, true);
+        mkdir($distDir, 0755, true);
+
+        file_put_contents($schemaDir . '/invalid.json', '{invalid json}');
+
+        ob_start();
+        ($this->fakeJsons)($schemaDir, $distDir);
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('invalid.json:', $output);
+
+        unlink($schemaDir . '/invalid.json');
+        rmdir($schemaDir);
+        if (is_dir($distDir)) {
+            rmdir($distDir);
+        }
+
+        rmdir($tmpDir);
     }
 }

@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": [
+    "inlineRef"
+  ],
+  "properties": {
+    "inlineRef": {
+      "$ref": "./def/typeOnly.json#/properties/typeOnly"
+    }
+  }
+}

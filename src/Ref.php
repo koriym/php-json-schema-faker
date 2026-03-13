@@ -70,10 +70,6 @@ final class Ref
             throw new RuntimeException("External JSON schema file not found: {$jsonPath}");
         }
 
-        if (! file_exists($realPath)) {
-            return $this->inlineRefInExternalRef($realPath);
-        }
-
         return $this->faker->generate(new SplFileInfo($realPath), $parentSchema, dirname($jsonPath));
     }
 
@@ -91,8 +87,8 @@ final class Ref
         }
 
         $contents = file_get_contents($schemaFile);
-        if ($contents === false) {
-            throw new RuntimeException("Failed to read schema file: {$schemaFile}");
+        if ($contents === false) { // @codeCoverageIgnore
+            throw new RuntimeException("Failed to read schema file: {$schemaFile}"); // @codeCoverageIgnore
         }
 
         $json = json_decode($contents);

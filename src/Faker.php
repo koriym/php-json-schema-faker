@@ -10,7 +10,6 @@ use Faker\Provider\DateTime;
 use Faker\Provider\Internet;
 use Faker\Provider\Lorem;
 use InvalidArgumentException;
-use LogicException;
 use SplFileInfo;
 use stdClass;
 
@@ -29,7 +28,6 @@ use function func_get_args;
 use function gettype;
 use function in_array;
 use function is_array;
-use function is_callable;
 use function is_object;
 use function json_decode;
 use function max;
@@ -109,12 +107,7 @@ final class Faker
             throw new UnsupportedTypeException($type);
         }
 
-        $faker = [$this, $this->fakers[$type]];
-        if (is_callable($faker)) {
-            return call_user_func($faker, $schema);
-        }
-
-        throw new LogicException();
+        return call_user_func([$this, $this->fakers[$type]], $schema);
     }
 
     public function mergeObject()
