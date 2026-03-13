@@ -10,7 +10,6 @@ use Faker\Provider\DateTime;
 use Faker\Provider\Internet;
 use Faker\Provider\Lorem;
 use InvalidArgumentException;
-use LogicException;
 use SplFileInfo;
 use stdClass;
 
@@ -18,6 +17,7 @@ use function array_keys;
 use function array_merge;
 use function array_slice;
 use function array_unique;
+use function array_values;
 use function call_user_func;
 use function call_user_func_array;
 use function count;
@@ -28,7 +28,6 @@ use function func_get_args;
 use function gettype;
 use function in_array;
 use function is_array;
-use function is_callable;
 use function is_object;
 use function json_decode;
 use function max;
@@ -108,12 +107,7 @@ final class Faker
             throw new UnsupportedTypeException($type);
         }
 
-        $faker = [$this, $this->fakers[$type]];
-        if (is_callable($faker)) {
-            return call_user_func($faker, $schema);
-        }
-
-        throw new LogicException();
+        return call_user_func([$this, $this->fakers[$type]], $schema);
     }
 
     public function mergeObject()
@@ -330,7 +324,7 @@ final class Faker
 
         $this->schemaDir = $dir;
 
-        return $schema->uniqueItems ?? false ? array_unique($dummies) : $dummies;
+        return $schema->uniqueItems ?? false ? array_values(array_unique($dummies)) : $dummies;
     }
 
     private function fakeObject(stdClass $schema): stdClass

@@ -45,8 +45,8 @@ final class FakeJsons
 
                 $targetPath = $distDir . str_replace($schemaDir, '', $fileInfo->getPath());
                 if (! file_exists($targetPath)) {
-                    if (! mkdir($targetPath, 0755, true) && ! is_dir($targetPath)) {
-                        throw new RuntimeException(sprintf('Directory "%s" was not created', $targetPath));
+                    if (! mkdir($targetPath, 0755, true) && ! is_dir($targetPath)) { // @codeCoverageIgnore
+                        throw new RuntimeException(sprintf('Directory "%s" was not created', $targetPath)); // @codeCoverageIgnore
                     }
                 }
 
